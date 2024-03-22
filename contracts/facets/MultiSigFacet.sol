@@ -3,11 +3,14 @@ pragma solidity ^0.8.9;
 
 import {LibAppStorage} from "../libraries/LibAppStorage.sol";
 import {LibError} from "../libraries/LibError.sol";
+import {LibEvents} from "../libraries/LibEvents.sol";
 contract MultiSigFacet{
     LibAppStorage.Layout internal _appStorage;
 
 
     function submitTransaction(address _reieiver, uint256 _amount) external {
+        onlyValidSigner();
+
         if(_amount <= 0) revert LibError.INVALID_AMOUNT();
         uint _tranId = _appStorage.transactionId + 1;
         LibAppStorage.Transaction storage _transaction = _appStorage.transactions[_tranId];
@@ -23,15 +26,29 @@ contract MultiSigFacet{
         
         _appStorage.hasSigned[_txId][msg.sender] = true;
 
-        emit SumbitTransaction(msg.sender, _reieiver , _amount);
+        emit LibEvents.SumbitTransaction(msg.sender, _reieiver , _amount);
 
     }
 
     function approveTransaction(uint _txId) external{
-        if(_txId > _appStorage.transactionId) revert LibError.INVALID_TRANSACTION_ID();
-        if(!_appStorage.hasSigned[msg,sender]) revert LibError.ALREADY_SIGNED();
+        onlyValidSigner();
         
+        if(_txId > _appStorage.transactionId) revert LibError.INVALID_TRANSACTION_ID();
+        if(_appStorage.hasSigned[msg.sender]) revert LibError.ALREADY_SIGNED();
+        LibAppStorage.Transaction storage _foundTransaction _appStorage.transactions[_txId];
+        if(_foundTransaction.signersCount < _appStorage.numberOfSigners) revert LibError.SIGNERS_NOT_REACH();
+        if(_foundTransaction.isExecuted) revert LibError.TRANSACTION_ALREADY_EXECUTED();
 
+        _foundTransaction.signersCount += 1;
+        _appStorage.hasSigned[msg.sender] = true;
+        if(_foundTransaction.signersCount == _appStorage.numberOfSigners){
+            _foundTransaction.isExecuted = true; 
+        }
+        emit LibEvents.TransactionApproval(msg.sender, _txId );
+    }
+
+     function onlyValidSigner() private view {
+        if(!_appStorage.isValidSigner[msg.sender]) revert LibError.NOT_VALID_SIGNER();
     }
 
 

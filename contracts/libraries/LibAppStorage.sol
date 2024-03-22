@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity ^0.8.9;
+import {LibEvents} from "../libraries/LibEvents.sol";
 
 library LibAppStorage {
 
-   event Transfer(address indexed _from,address indexed _to, uint _amount);
+   
 
    struct Vault {
         uint amount;
@@ -20,6 +21,7 @@ library LibAppStorage {
         address txCreator;
         uint256 timeIntiated;
         uint256 timeExcuted;
+        
     }
 
     struct Layout{
@@ -37,7 +39,9 @@ library LibAppStorage {
         uint transactionId;
         mapping(uint => Transaction) transactions;
         mapping(uint => mapping(address => bool)) hasSigned;
+        mapping(address => bool) isValidSigner;
         Transaction [] transactionList;
+        address owner;
         // vault facet
         mapping(address => Vault) lockedDetails;
 
@@ -64,7 +68,7 @@ library LibAppStorage {
         );
         l.balances[_from] = frombalances - _amount;
         l.balances[_to] += _amount;
-        emit Transfer(_from, _to, _amount);
+        emit LibEvents.Transfer(_from, _to, _amount);
     }
 
 

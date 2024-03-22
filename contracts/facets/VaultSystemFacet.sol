@@ -22,6 +22,13 @@ contract VaultSystemFacet{
         emit LibEvents.DepositAmount(msg.sender, address(this), _lockedDetails.amount);
         
     }
+
+    function withdrawFromVault(uint id, uint _amount) external {
+        if(!_appStorage.hasSigned[msg.sender])revert  LibError.NOT_AUTHORIZED();
+
+            
+    }
+    
     
     
 
