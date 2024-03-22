@@ -8,6 +8,7 @@ library LibError{
    error SIGNERS_NOT_REACH();
    error TRANSACTION_ALREADY_EXECUTED();
    error NOT_AUTHORIZED();
+   error TRANSACTION_NOT_APPROVE_YET();
 
 
 }

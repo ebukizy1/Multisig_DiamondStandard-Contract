@@ -23,8 +23,14 @@ contract VaultSystemFacet{
         
     }
 
-    function withdrawFromVault(uint id, uint _amount) external {
-        if(!_appStorage.hasSigned[msg.sender])revert  LibError.NOT_AUTHORIZED();
+    function withdrawFromVault(uint txId) external {
+        if(!_appStorage.isValidSigner[msg.sender])revert  LibError.NOT_AUTHORIZED();
+        if(_appStorage.balanceOf[address(this)] < _amount)revert LibError.INSUFFICIENT_FUNDS();
+        if(_txId > _appStorage.transactionId) revert LibError.INVALID_TRANSACTION_ID();
+        LibAppStorage.Transaction storage _foundTransaction = _appStorage.transactions[txId];
+        if(!_foundTransaction.isExecuted) revert LibError.TRANSACTION_NOT_APPROVE_YET();
+        uint _amountTranfer = _foundTransaction.amount; 
+        
 
             
     }
